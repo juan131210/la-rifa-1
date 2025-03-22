@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Boleto de Rifa</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+
+    .boleto {
+      width: 600px;
+      margin: auto;
+      background: white;
+      border: 2px dashed #000;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .boleto h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    .boleto p {
+      font-size: 18px;
+      margin: 8px 0;
+    }
+
+    .numero {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1a237e;
+      margin: 15px 0;
+    }
+
+    .premio {
+      font-size: 20px;
+      margin: 15px 0;
+      color: #d32f2f;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #d32f2f;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="boleto">
+    <h1>🎉 Boleto de Rifa 🎉</h1>
+    <p><strong>Evento:</strong> Fiesta de Primavera 2025</p>
+    <p><strong>Nombre:</strong> ________________________</p>
+    <p class="numero"><strong>Boleto N.º:</strong> <span id="numeroBoleto">Cargando...</span></p>
+    <p class="premio">🎁 Premio: Canasta Sorpresa</p>
+    <p><strong>Fecha del Sorteo:</strong> 25 de Abril de 2025</p>
+    <p class="footer">Gracias por participar y ¡mucha suerte!</p>
+    <button onclick="resetearContador()">🔄 Resetear Contador</button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyArP7_KBCRBKKgJshqcobQiq8XuZVmhq0s",
+  authDomain: "rifa-1-5ad7a.firebaseapp.com",
+  databaseURL: "https://rifa-1-5ad7a-default-rtdb.firebaseio.com",
+  projectId: "rifa-1-5ad7a",
+  storageBucket: "rifa-1-5ad7a.firebasestorage.app",
+  messagingSenderId: "1003118722024",
+  appId: "1:1003118722024:web:290f68cf528020f84a425d",
+  measurementId: "G-CKKVTQRDV1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const contadorRef = db.ref('contadorBoletos');
+
+    contadorRef.transaction(current => {
+      if (current === null) return 0;
+      if (current >= 99) return 0;
+      return current + 1;
+    }, (error, committed, snapshot) => {
+      if (error || !committed) {
+        alert("Error al generar el número de boleto.");
+        document.getElementById("numeroBoleto").textContent = "ERROR";
+      } else {
+        const num = snapshot.val().toString().padStart(2, '0');
+        document.getElementById("numeroBoleto").textContent = '#' + num;
+      }
+    });
+
+    function resetearContador() {
+      const confirmar = confirm("¿Estás seguro de que quieres reiniciar el contador?");
+      if (confirmar) {
+        contadorRef.set(0)
+          .then(() => {
+            alert("Contador reiniciado. Recarga la página.");
+            location.reload();
+          })
+          .catch(() => alert("Error al reiniciar el contador."));
+      }
+    }
+  </script>
+</body>
+</html>
